@@ -101,20 +101,21 @@ You can open these with Excel.
 ## 5. Troubleshooting
 
 
-**The program closed right after I picked a port / it says "Could not open":**
--
-
-**I don't see the sampler in the "Unsure" list:**
--
+**The program won't start after I enter a port:**
+- Make sure no other windows of this are running. They will keep control of the port and you won't be able to connect.
+- Try some other ports if there aren't too many, maybe the port assignment changed.
+- Alternatively, the configuration of your ports may be messed up. This is a more advanced issue so I'll walk through the solution, but it may be worth getting someone with some backgroud: you need to make sure that the Moxa port and the computer are on the same subnet. You will need to go to the ethernet confiuration in settings and make sure it is set manually to the correct subnet (192.168.1.X) and Gateway (255.255.255.0). If you see that it says DHCP, this is wrong. Also make sure the X isn't overlapping with anything important. Pick a number randomly between 220 and 280 for X and it is likely to be fine.
 
 **A pump won't start:**
--
+- Do other pumps still work?
+  - Yes: Try toggling that pump on and off a few times with all other pumps off. If it still doesn't work it may be a mechanical or electrical issue
+  - No: Make sure you select start mission before touching the pumps. If you didn't, you may have to quit the program and restart it.
 
 **The window is frozen / not responding:**
--
+- Force quit the window with the task manager. Then retry launching the program. If you are now stuck on.
 
-**Nothing happens when I click buttons:**
--
+**I clicked X when entering the port and saw an error message:**
+- You are ok. This error will not impact anything. Don't fret.
 
 **Other notes:**
--
+- When in doubt, wait 30 seconds to see if things progress, and then restart the computer.
