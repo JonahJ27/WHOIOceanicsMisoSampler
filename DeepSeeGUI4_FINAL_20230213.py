@@ -1,6 +1,6 @@
 # "DeepSeeGUI4_FINAL_20230213.py"
 # This GUI allows a user to control the DeepSee Sampler System with button presses
-#DeepSEE GUI3 (firmware v0.95) + threading, logging, graphing
+# DeepSEE GUI3 (firmware v0.95) + threading, logging, graphing
 
 from posixpath import split
 import tkinter as tk
@@ -18,15 +18,18 @@ import matplotlib.pyplot as plt
 from numpy import genfromtxt
 import serial.tools.list_ports
 
-#VARIABLES
-#File paths for logs (if these are left as file names, they will appear in the current working dir.)
+# VARIABLES
+# File paths for logs (if these are left as file names, they will appear in the current working dir.)
 volumes_feed = "volumes_feed_1.csv" #only vols from the HBs
 command_hist = "command_hist_1.csv" #all commands sent + ACKs from sampler. May include some serial line errors from startup.
 sampler_feed = "sampler_Feed_1.csv" #everything received from sampler (HB's and ACK's)
 
-#Serial port - auto-detect the first available port
-def find_port(prefer_keyword="Moxa"):
+# Serial port - auto-detect the first available port
+def find_port(prefer_keyword=None):
     ports = list(serial.tools.list_ports.comports())
+    print("Available COM ports:")
+    for p in ports:
+        print(f"  {p.device}  -  {p.description}")
     if not ports:
         raise serial.SerialException("No COM ports found!")
 
@@ -41,10 +44,76 @@ def find_port(prefer_keyword="Moxa"):
     print(f"Selected {ports[0].device} ({ports[0].description})")
     return ports[0].device
 
-com_port = find_port()                    # first port found
+# Prompt the user to type in the COM port with a GUI window.
+# If the user is unsure, the "Unsure" button lists all available serial
+# devices in a selectable/copyable text box.
+def prompt_for_port():
+    dialog = tk.Tk()
+    dialog.title("Select COM Port")
+    dialog.geometry("500x400")
+
+    selected = {"port": None}
+
+    # Prompt label + entry for typing the COM port
+    tk.Label(dialog, text="Enter the port to open (e.g. /dev/ttyUSB0 or COM3):",
+             font=("Arial", 12)).pack(pady=(15, 5))
+
+    port_var = tk.StringVar()
+    entry = tk.Entry(dialog, textvariable=port_var, font=("Arial", 12), width=30)
+    entry.pack(pady=5)
+    entry.focus_set()
+
+    # Read-only text box where available devices are listed. Using a Text
+    # widget (rather than a Label) lets the user select and copy the names.
+    device_box = tk.Text(dialog, font=("Courier", 10), height=10, wrap="none")
+    device_box.pack(fill="both", expand=True, padx=15, pady=10)
+    device_box.configure(state="disabled")
+
+    def set_box_text(text):
+        device_box.configure(state="normal")
+        device_box.delete("1.0", "end")
+        device_box.insert("1.0", text)
+        device_box.configure(state="disabled")  # read-only, but still copyable
+
+    def list_devices():
+        ports = list(serial.tools.list_ports.comports())
+        if not ports:
+            set_box_text("No serial devices found.")
+            return
+        lines = ["Available serial devices (select + Ctrl-C to copy):", ""]
+        for p in ports:
+            lines.append(f"{p.device}  -  {p.description}")
+        set_box_text("\n".join(lines))
+
+    def confirm():
+        value = port_var.get().strip()
+        if value:
+            selected["port"] = value
+            dialog.destroy()
+
+    # Pressing Enter in the entry confirms the choice
+    entry.bind("<Return>", lambda event: confirm())
+
+    # Bottom buttons: OK to confirm, Unsure to list devices
+    button_frame = tk.Frame(dialog)
+    button_frame.pack(side="bottom", fill="x", pady=10)
+
+    tk.Button(button_frame, text="OK", command=confirm,
+              font=("Arial", 12), width=10).pack(side="left", padx=20)
+    tk.Button(button_frame, text="Unsure", command=list_devices,
+              font=("Arial", 12), width=10).pack(side="right", padx=20)
+
+    dialog.mainloop()
+
+    if not selected["port"]:
+        raise serial.SerialException("No COM port selected!")
+    print(f"Selected {selected['port']}")
+    return selected["port"]
+
+com_port = prompt_for_port()              # ask the user which port to open
 # com_port = find_port("Moxa")           # or: first Moxa port found
 
-#LOGGING
+# LOGGING
 def log(data, log_path):
     with open(log_path, 'a', newline='') as f:
         writer = csv.writer(f)
@@ -53,11 +122,11 @@ def log(data, log_path):
         data.insert(0, now)
         writer.writerow(data)
 
-#SERIAL SETUP
+# SERIAL SETUP
 def open_serial(port, baud, timeout=5, retries=3, delay=2):
     for attempt in range(1, retries + 1):
         try:
-            s = serial.Serial(rf'\\.\{port}', baud, timeout=timeout)
+            s = serial.Serial(rf'{port}', baud, timeout=timeout)
             print(f"Opened {port} on attempt {attempt}")
             return s
         except serial.SerialException as e:
@@ -86,7 +155,7 @@ class SerialThread(threading.Thread):
     def stop(self):
         self._running = False
 
-#GRAPHING
+# GRAPHING
 def graph():
     #grab data
     my_data = genfromtxt(volumes_feed, delimiter=',')
