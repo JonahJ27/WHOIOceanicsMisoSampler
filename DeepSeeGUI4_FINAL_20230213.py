@@ -25,7 +25,7 @@ command_hist = "command_hist_1.csv" #all commands sent + ACKs from sampler. May 
 sampler_feed = "sampler_Feed_1.csv" #everything received from sampler (HB's and ACK's)
 
 #Serial port - auto-detect the first available port
-def find_port(prefer_keyword=None):
+def find_port(prefer_keyword="Moxa"):
     ports = list(serial.tools.list_ports.comports())
     if not ports:
         raise serial.SerialException("No COM ports found!")
