@@ -173,7 +173,126 @@ matplotlib.use("TkAgg")
 
 ---
 
-## 6. Known rough edges / TODO
+## 6. Connecting over Ethernet with a Moxa NPort
+
+Normally the DeepSee sampler plugs into the computer with a USB/serial cable and
+shows up as a COM port. A **Moxa NPort** lets you connect that same sampler over
+an **Ethernet (network) cable** instead. It's a small box: the sampler's serial
+cable plugs into the NPort, and an Ethernet cable runs from the NPort to the
+computer. A piece of Moxa software then makes the sampler show up on the
+computer as a normal COM port — the DeepSee GUI can't tell the difference.
+
+This walkthrough sets things up so the sampler appears as **COM8**, connected
+through **port 1** of an NPort whose network address is **192.168.1.101**.
+
+> **You'll need the NPort's network address (IP).** This guide uses
+> `192.168.1.101`. If your NPort is set to a different address, either use that
+> address throughout, or change the NPort to `192.168.1.101` (see §6.5).
+
+### 6.1 Is the Moxa software already on the computer? (Usually no)
+
+Windows does **not** come with the Moxa NPort software. On a brand-new machine
+you have to install it yourself before COM8 will work. To check whether it's
+already there, look in the Windows Start menu for **"NPort Windows Driver
+Manager"** or **"NPort Administrator"**. If you don't see them, follow §6.2 to
+install. If you do, skip to §6.3.
+
+### 6.2 Install the Moxa NPort software
+
+1. On a computer with internet access, go to **moxa.com** and search for your
+   NPort model (it's printed on the label of the box — e.g. *NPort 5150*,
+   *5210*, *5610*).
+2. Download the **NPort Windows Driver Manager** (it comes inside the **NPort
+   Administration Suite** — the free Windows software/driver package for that
+   model).
+3. Run the downloaded installer and click through with the default options.
+   When Windows asks to trust/install the Moxa driver, allow it.
+4. When it finishes you should have **NPort Windows Driver Manager** and **NPort
+   Administrator** in the Start menu.
+
+*(On a machine with no internet, download the installer elsewhere and copy it
+over on a USB stick.)*
+
+### 6.3 Plug everything in
+
+1. Connect the sampler's serial cable into **Port 1** on the NPort.
+2. Connect an Ethernet cable from the NPort to the computer (or into the same
+   network switch the computer uses).
+3. Power on the NPort.
+
+### 6.4 Put the computer on the same network as the NPort
+
+The computer and the NPort have to be on the same network "neighborhood" to talk
+to each other. Give the computer a fixed network address that matches the
+NPort's:
+
+1. Open **Settings → Network & Internet → Ethernet → Change adapter options**
+   (or **Control Panel → Network and Sharing Center → Change adapter
+   settings**).
+2. Right-click the **Ethernet** connection → **Properties**.
+3. Select **Internet Protocol Version 4 (TCP/IPv4)** → **Properties**.
+4. Choose **Use the following IP address** and enter:
+   - **IP address:** `192.168.1.100`
+   - **Subnet mask:** `255.255.255.0`
+   - Leave the gateway blank.
+5. Click **OK**.
+
+To confirm the computer can reach the NPort, open **Command Prompt** and type:
+
+```bat
+ping 192.168.1.101
+```
+
+You should see replies. If it says "Request timed out," re-check the cabling and
+the address you typed above.
+
+### 6.5 (Only if needed) Set the NPort's address to 192.168.1.101
+
+Skip this if the NPort is already at `192.168.1.101`. Otherwise:
+
+1. Open **NPort Administrator**.
+2. Click **Configuration**, then **Search** — it finds NPorts on the network and
+   lists their current addresses.
+3. Select your NPort, open the **Network** tab, and set the IP to
+   **`192.168.1.101`** with subnet mask **`255.255.255.0`**. Save/apply (the
+   NPort may restart).
+
+### 6.6 Make the sampler appear as COM8
+
+1. Open **NPort Windows Driver Manager**.
+2. Click **Add**.
+3. Let it search the network, or type the NPort's address **`192.168.1.101`**
+   by hand.
+4. Pick your NPort, then choose **Port 1**.
+5. Set the COM port number to **COM8**. (If it suggests COM8 already, accept it;
+   otherwise select the entry, click **Port Setting** / **Modify**, and change
+   the number to **COM8**.)
+6. Click **Apply** / **OK**.
+
+That's it — the sampler is now available as **COM8**, and the setting sticks
+even after restarting the computer.
+
+### 6.7 Check that it worked
+
+1. Open the DeepSee GUI.
+2. At the port prompt, type **`COM8`** and continue. (The **Unsure** button also
+   lists available ports — COM8 should be in the list.)
+3. If the sampler connects and data starts flowing, you're done.
+
+### 6.8 If something isn't working
+
+- **`ping` fails / NPort not found:** re-check the Ethernet cabling and that you
+  entered the computer's IP exactly as in §6.4. Try **Search** in NPort
+  Administrator.
+- **COM8 connects but no data appears:** in NPort Administrator, confirm Port 1
+  is set to **Real COM** mode, and double-check the sampler's serial cable is in
+  Port 1.
+- **It says COM8 is already in use:** in NPort Windows Driver Manager, choose a
+  different free number, or remove the old COM8 entry first.
+
+---
+
+## 7. Known rough edges / TODO
 
 - Unused imports (`posixpath.split`, `pyparsing.col`) should be removed.
 - High COM numbers (`COM10+`) on Windows may need the `\\.\` prefix — consider

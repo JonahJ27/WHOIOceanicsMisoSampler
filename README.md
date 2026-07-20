@@ -10,7 +10,7 @@ below in order.
 
 1. Find the file named **`WHOIOceanicsSampler.exe`**.
 2. **Double-click it.**
-3. Wait a few seconds. Two things will happen:
+3. Wait a **5-15 seconds**. Two things will happen:
    - A small window titled **"Select COM Port"** appears first.
    - After you finish that step, the main control window opens.
 
@@ -116,6 +116,24 @@ You can open these with Excel.
 
 **I clicked X when entering the port and saw an error message:**
 - You are ok. This error will not impact anything. Don't fret.
+
+**My computer fell in the ocean**
+Get the flashdrive with the software on it. In it you should see a **`WHOIOceanicsSampler.exe`** file. Move that to your computer. You will also need to set up your computer to connect over ethernet to the MISO by configuring port 1 to link to the COM8 port. That protocol is linked on the flashdrive in the **DEVELOPER.md** file.
+
+**My computer fell in the ocean with the flashdrive (Full New Machine Setup)**
+
+Everything is stored online, so you can rebuild from a new **Windows computer**
+with internet.
+
+1. In a web browser, go to
+   **https://github.com/JonahJ27/WHOIOceanicsMisoSampler**.
+2. Click **`WHOIOceanicsSampler.exe`** in the file list, then click **Download**.
+   (If the browser warns about the file, choose **Keep**.)
+3. Set up the Ethernet connection: on that same GitHub page, open
+   **`DEVELOPER.md`** and follow **Section 6 ("Connecting over Ethernet with a
+   Moxa NPort")** to install the Moxa software and get the sampler onto **COM8**.
+4. Double-click the downloaded **`WHOIOceanicsSampler.exe`**, then continue from
+   **Section 1** of this guide as usual (use port **COM8**).
 
 **Other notes:**
 - When in doubt, wait 30 seconds to see if things progress, and then restart the computer.
